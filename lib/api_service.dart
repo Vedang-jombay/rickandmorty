@@ -1,15 +1,17 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 class ApiService {
   static Future<dynamic> fetchData() async {
-    final response = await http.get(
-      Uri.parse('https://rickandmortyapi.com/api/character'),
-    );
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to load data');
+    Dio dio = Dio();
+    try {
+      Response response = await dio.get('https://rickandmortyapi.com/api/character');
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      throw Exception('Failed to load data: $e');
     }
   }
 }

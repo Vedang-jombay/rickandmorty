@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 void main() {
   runApp(MyApp());
@@ -70,12 +70,17 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<List<Character>> fetchCharacters() async {
-    final response = await http.get(Uri.parse('https://rickandmortyapi.com/api/character'));
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonData = jsonDecode(response.body)['results'];
-      return jsonData.map((character) => Character.fromJson(character)).toList();
-    } else {
-      throw Exception('Failed to load characters');
+    Dio dio = Dio();
+    try {
+      Response response = await dio.get('https://rickandmortyapi.com/api/character');
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonData = response.data['results'];
+        return jsonData.map((character) => Character.fromJson(character)).toList();
+      } else {
+        throw Exception('Failed to load characters');
+      }
+    } catch (e) {
+      throw Exception('Failed to load characters: $e');
     }
   }
 
