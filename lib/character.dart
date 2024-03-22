@@ -5,6 +5,7 @@ class Character {
   final String species;
   final String gender;
   final String image;
+  final List<String> episodeUrls;
 
   Character({
     required this.id,
@@ -13,6 +14,7 @@ class Character {
     required this.species,
     required this.gender,
     required this.image,
+    required this.episodeUrls,
   });
 
   factory Character.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Character {
       species: json['species'],
       gender: json['gender'],
       image: json['image'],
+      episodeUrls: List<String>.from(json['episode']),
     );
   }
 }

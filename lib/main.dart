@@ -15,6 +15,7 @@ class Character {
   final String image;
   final String lastKnownLocation;
   final String firstKnownLocation;
+  final List<String> episodeUrls; // Define episodeUrls
 
   Character({
     required this.id,
@@ -25,6 +26,7 @@ class Character {
     required this.image,
     required this.lastKnownLocation,
     required this.firstKnownLocation,
+    required this.episodeUrls, // Add episodeUrls here
   });
 
   factory Character.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,7 @@ class Character {
       image: json['image'],
       lastKnownLocation: json['location']['name'],
       firstKnownLocation: json['origin']['name'],
+      episodeUrls: List<String>.from(json['episode']), // Parse episode URLs
     );
   }
 }
@@ -182,47 +185,113 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-class CharacterDetailsScreen extends StatelessWidget {
+class CharacterDetailsScreen extends StatefulWidget {
   final Character character;
 
   CharacterDetailsScreen({required this.character});
 
   @override
+  _CharacterDetailsScreenState createState() => _CharacterDetailsScreenState();
+}
+
+class _CharacterDetailsScreenState extends State<CharacterDetailsScreen> {
+  late List<String> episodes;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchEpisodes();
+  }
+
+  Future<void> fetchEpisodes() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    List<String> episodeList = [];
+
+    try {
+      for (String url in widget.character.episodeUrls) {
+        Response response = await Dio().get(url);
+        if (response.statusCode == 200) {
+          Map<String, dynamic> episodeData = response.data;
+          episodeList.add(episodeData['name']);
+        }
+      }
+    } catch (e) {
+      print('Error fetching episodes: $e');
+    }
+
+    setState(() {
+      episodes = episodeList;
+      isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(character.name),
+        title: Text(widget.character.name),
       ),
-      body: Padding(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(character.image),
+            Image.network(widget.character.image),
             SizedBox(height: 16),
             Text(
-              'Name: ${character.name}',
+              'Name: ${widget.character.name}',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Status: ${character.status}',
+              'Status: ${widget.character.status}',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Species: ${character.species}',
+              'Species: ${widget.character.species}',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Gender: ${character.gender}',
+              'Gender: ${widget.character.gender}',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Last Known Location: ${character.lastKnownLocation}',
+              'Last Known Location: ${widget.character.lastKnownLocation}',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'First Seen in: ${character.firstKnownLocation}',
+              'First Seen in: ${widget.character.firstKnownLocation}',
               style: TextStyle(color: Colors.white),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Episodes:',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Expanded(
+              child: ListView.builder(
+                itemCount: episodes.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: InkWell(
+                      onTap: () {
+                        // Handle episode link tap
+                        // Example: Launch the episode link in a browser
+                      },
+                      child: Text(
+                        episodes[index],
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -230,3 +299,5 @@ class CharacterDetailsScreen extends StatelessWidget {
     );
   }
 }
+
+
