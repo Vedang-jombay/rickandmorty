@@ -5,6 +5,8 @@ class Character {
   final String species;
   final String gender;
   final String image;
+  final String lastKnownLocation;
+  final String firstKnownLocation;
   final List<String> episodeUrls;
 
   Character({
@@ -14,6 +16,8 @@ class Character {
     required this.species,
     required this.gender,
     required this.image,
+    required this.lastKnownLocation,
+    required this.firstKnownLocation,
     required this.episodeUrls,
   });
 
@@ -25,6 +29,8 @@ class Character {
       species: json['species'],
       gender: json['gender'],
       image: json['image'],
+      lastKnownLocation: json['location']['name'],
+      firstKnownLocation: json['origin']['name'],
       episodeUrls: List<String>.from(json['episode']),
     );
   }
